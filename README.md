@@ -1,106 +1,136 @@
 # microbox
 
-**An experimental Linux sandbox for native, untrusted workloads.**
+**Native Linux workloads. Explicit capabilities. Observable teardown.**
 
-A Rust library and CLI that separate asynchronous orchestration from single-threaded isolation setup. Each run gets private mount, PID, network, IPC and UTS namespaces; a read-only root; bounded temporary storage; a seccomp allowlist; and a dedicated cgroups v2 leaf.
+microbox is an embeddable Rust sandbox and CLI for short-lived, untrusted workloads. Namespace setup runs in a dedicated helper process; Tokio workers never change namespaces. Each execution has its own cgroup, PID tree, read-only filesystem view, bounded scratch space, strict syscall profile, and independently verifiable audit root.
 
 [![Verify microbox](https://github.com/mahasmrtiadhuri/microbox/actions/workflows/ci.yml/badge.svg)](https://github.com/mahasmrtiadhuri/microbox/actions/workflows/ci.yml)
 
-**Status:** experimental Milestone 1 implementation, Linux x86-64, explicitly privileged setup. No setuid helper, daemon listener, rootless mode, production-hardening claim, or measured sub-millisecond promise. Read [SECURITY.md](SECURITY.md) before running it.
+**v0.2 scope:** experimental Linux x86-64 runtime with air-gapped execution and an optional bounded HTTPS-fetch capability. This is a shared-kernel boundary requiring privileged setup; it is not a production certification, rootless runtime, or sub-millisecond performance claim. [Security model](SECURITY.md).
 
-## What the boundary enforces
+## Capabilities
 
-| Boundary | Implementation |
+| Area | Behavior |
 |---|---|
-| Host filesystem | Non-recursive root bind, private mount propagation, `pivot_root`, detached old root, read-only/nosuid/nodev root |
-| Writable storage | `/tmp` tmpfs with byte and inode limits, nodev/nosuid/noexec |
-| Network | Fresh network namespace with no configured interfaces; socket creation may succeed but external communication cannot |
-| Process visibility | Dedicated PID namespace with a trusted PID 1 reaper; fresh read-only procfs with `hidepid=2` |
-| Privilege | Payload UID/GID 65534, empty supplementary groups, dropped capability bounding set, no-new-privileges |
-| Syscalls | Native x86-64 allowlist; ABI/x32 rejection; argument checks for clone; clone3 returns ENOSYS for libc fallback |
-| Resources | `memory.max`, zero swap, OOM group kill, CPU bandwidth quota, and `pids.max` |
-| Lifecycle | Cgroup enrollment before helper setup, whole-cgroup kill on completion/timeout/output limit/cancellation, empty-group verification |
-| Evidence | Exclusive host audit file, configuration and outcomes, output digests, observed cgroup counters, externally anchored hash chain |
+| Native workloads | Static binaries, dynamically linked tools, shell commands, Python standard library and subprocesses |
+| Filesystem | Private mount namespace, non-recursive root bind, pivot_root, detached old root, read-only/nosuid/nodev root |
+| Scratch | Size- and inode-bounded tmpfs at /tmp; nodev/nosuid/noexec |
+| Process isolation | Private PID/IPC/UTS namespaces, trusted PID 1 reaper, namespace-local read-only procfs |
+| Identity | UID/GID 65534, cleared capability sets and supplementary groups, no-new-privileges, bounded file descriptors |
+| Syscalls | Native x86-64 allowlist, ABI/x32 rejection, clone flag checks, explicit kill/errno modes |
+| Resources | cgroups v2 memory, swap, CPU bandwidth and PID limits; whole-cgroup termination |
+| Networking | No configured network interfaces; optional HTTPS GETs through one explicitly granted Unix socket |
+| Lifecycle | Timeout, cancellation and output-limit handling; empty-leaf verification before successful cleanup |
+| Evidence | Structured outcomes, peak memory and CPU/PID counters, bounded output prefixes, stream hashes, anchored audit chains |
 
-Unknown prerequisites or failed setup abort the run. The library never silently executes outside its boundary.
+Missing prerequisites and failed setup never fall back to unrestricted execution.
 
-## Layout
+## Quick start
 
-| Crate | Responsibility |
-|---|---|
-| `microbox-sys` | Auditable syscall wrappers, mount setup, identity drop, pure Rust BPF builder |
-| `microbox-helper` | Single-threaded namespace setup, trusted PID 1, filtered payload exec |
-| `microbox` | Tokio-compatible API, dedicated supervisor thread, cgroup lifecycle, bounded capture and audit |
-| `microbox-cli` | JSON configuration, run, audit verification and cancellation exercise |
-
-The embedding process never calls `unshare`. It launches the helper using `Command`; its only `pre_exec` operation is an async-signal-safe descriptor duplication. A private control socket reports readiness and payload status. Configuration travels over a pipe mapped to helper stdin and is replaced by `/dev/null` before the payload starts. A separate close-on-exec pipe distinguishes exec errors from ordinary exit 126.
-
-## Build and verify
+Requirements: Linux x86-64, current stable Rust, cgroups v2 with delegated cpu/memory/pids controllers, cgroup.kill and memory.peak, namespace/mount privileges, Python 3, gcc with static libc, OpenSSL, iproute2, util-linux and strace for the full test suite. Use a disposable development host.
 
 ```bash
 cargo build --release --workspace --locked
+sudo chown root:root target/release/microbox-helper
+sudo chmod 755 target/release/microbox-helper
+sudo mkdir /sys/fs/cgroup/microbox-demo
+sudo python3 scripts/rootfs.py /var/tmp/microbox-demo-rootfs
+sudo python3 scripts/demo.py \
+  --rootfs /var/tmp/microbox-demo-rootfs \
+  --cgroup /sys/fs/cgroup/microbox-demo \
+  --output /var/tmp/microbox-demo-evidence
+sudo rmdir /sys/fs/cgroup/microbox-demo
+```
+
+The rootfs builder copies explicitly trusted host tools, Python's distribution standard library and their shared libraries into a new directory. It never accepts an existing destination or downloads an image. Site packages and host application directories are excluded. Its manifest records file hashes and provenance; treat the prepared tree and helper as trusted, immutable inputs.
+
+The demo runs Python as the unprivileged sandbox identity, returns JSON, and verifies the host audit file against the separately returned root. Evidence and rootfs directories remain available for inspection.
+
+## Rust API and CLI
+
+```rust,no_run
+let config: microbox::Config = serde_json::from_reader(config_file)?;
+let outcome = microbox::run(config).await?;
+// Inspect termination, exit_code and signal before treating a workload as successful.
+```
+
+See [the compiling Rust example](crates/microbox/examples/run.rs). Concurrent runs use independent cgroup leaves. Dropping the future requests cancellation; the dedicated supervisor continues cleanup while the embedding process remains alive.
+
+```bash
+# Generate a complete air-gapped configuration without executing it.
+target/release/microbox-cli init-config \
+  /var/tmp/microbox-demo-rootfs "$PWD/target/release/microbox-helper" \
+  /sys/fs/cgroup/microbox-demo /var/tmp/unique-audit.jsonl \
+  /usr/bin/python3 -I -c 'print(sum(range(1000)))' > config.json
+sudo target/release/microbox-cli run config.json
+# Retain audit_root separately, then verify against that external anchor.
+target/release/microbox-cli verify /var/tmp/unique-audit.jsonl EXPECTED_ROOT
+```
+
+A nonzero workload exit is an observed execution outcome, not a CLI initialization error. SIGSYS appears as signal 31 rather than a synthesized shell status 159. [Configuration reference](docs/configuration.md).
+
+## Optional HTTPS access
+
+The workload retains its empty network namespace. Instead of adding a veth, bridge, route or transparent TCP tunnel, a single pathname socket exposes a narrow HTTPS GET capability. A separate proxy running as UID/GID 65533 enforces:
+
+- Exact canonical DNS hostnames; HTTPS on port 443 only.
+- Rejection of private, loopback, link-local, reserved and transition-address ranges, including mixed public/private DNS answers.
+- A validated, pinned destination address with normal TLS certificate and hostname verification.
+- No redirects, environment proxies, caller-supplied headers, request bodies, cookies or arbitrary CONNECT tunneling.
+- Bounded request size, session admissions, concurrency, response size and deadlines; independently anchored policy/outcome logs.
+
+```python
+import sys
+sys.path.insert(0, '/opt/microbox')
+from microbox_fetch import fetch
+status, body = fetch('https://example.com/')
+```
+
+There is no grant in the default configuration. Explicitly configure `network.mode = "https_fetch"` and a trusted proxy socket to enable it. See [deployment and protocol](docs/egress.md). Policy-approved URLs can still carry data to an approved host; this is destination authorization, not content inspection or proof of benign intent.
+
+## Verification
+
+```bash
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
+cargo doc --workspace --no-deps --locked
 ```
 
-The adversarial suite requires a disposable Linux host with cgroups v2, the cpu/memory/pids controllers delegated to an empty dedicated parent, writable `cgroup.kill`, and namespace/mount privileges. It deliberately fails rather than skipping on unsupported hosts.
+Real-kernel tests require a new rootfs path and an empty dedicated cgroup parent. They fail rather than skip when prerequisites are unavailable:
 
 ```bash
-# Operator-provisioned dedicated paths; do not use a production cgroup or host rootfs.
-export MICROBOX_CGROUP=/sys/fs/cgroup/microbox-test
-export MICROBOX_ROOTFS=/var/tmp/microbox-test-root
-sudo mkdir "$MICROBOX_CGROUP"
-sudo env MICROBOX_CGROUP="$MICROBOX_CGROUP" \
-  MICROBOX_ROOTFS="$MICROBOX_ROOTFS" bash tests/adversarial/host.sh
-sudo rmdir "$MICROBOX_CGROUP"
+sudo mkdir /sys/fs/cgroup/microbox-test
+sudo env MICROBOX_CGROUP=/sys/fs/cgroup/microbox-test \
+  MICROBOX_ROOTFS=/var/tmp/microbox-test-root \
+  bash tests/adversarial/host.sh
+sudo rmdir /sys/fs/cgroup/microbox-test
 ```
 
-The host script compiles a static C probe, exercises real kernel enforcement, then records 30 baseline samples. Results go to `results/adversarial.json` and `results/benchmark.json`. CI uploads these as **kernel-tests-and-measurements** artifacts. Unit tests of BPF policy decisions and audit verification are separate from real kernel tests.
+The suite covers resource exhaustion, fork-bomb containment, filesystem immutability, descriptor closure, syscall policies, cancellation, native/Python compatibility, concurrent runs, and an offline TLS fixture in a private network/mount namespace. The TLS fixture checks allowlists, private DNS results, certificate validation, redirects, malformed requests, direct-network bypass and session budgets. It never disables TLS verification or depends on a public website.
 
-## Run a command
+The recorded v0.2 candidate passed **17 Rust unit tests, 16 kernel containment checks, 9 dynamic/Python/concurrent workload checks, and 20 HTTPS capability checks**. The final source-tree CI repeats these checks and adds the standalone Python client contract tests. See [validation evidence](docs/validation.md).
 
-Prepare a trusted rootfs with root-owned, non-writable directories `tmp`, `proc`, `dev`, `sys`, and an empty `.microbox-old`. Provision the executable and all libraries it needs inside that tree. Do not pass `/`, a user-controlled tree, or a tree concurrently modified by another actor.
+CI uploads detailed outcomes and measurements as **kernel-tests-and-measurements**. [Recorded evidence](docs/validation.md).
 
-```json
-{
-  "rootfs": "/var/tmp/microbox-test-root",
-  "helper": "/absolute/path/to/microbox/target/release/microbox-helper",
-  "cgroup_parent": "/sys/fs/cgroup/microbox-test",
-  "audit_path": "/var/tmp/unique-run-audit.jsonl",
-  "argv": ["/bin/probe", "true"],
-  "memory_bytes": 33554432,
-  "tmp_bytes": 1048576,
-  "pids": 24,
-  "cpu_quota_us": 50000,
-  "timeout_ms": 2000,
-  "output_limit_bytes": 16384,
-  "deny_mode": "kill"
-}
-```
+## Measurements and scope
 
-```bash
-sudo target/release/microbox-cli run config.json
-# Keep the returned audit_root separately, then verify the file against that value:
-target/release/microbox-cli verify /var/tmp/unique-run-audit.jsonl EXPECTED_ROOT
-```
+Benchmarks separate static native execution, dynamically linked ls, and Python cold start, recording every sample with CPU/kernel metadata. Setup-readiness includes helper launch, cgroup provisioning, isolation work, IPC and parent polling. It is not an exact execve timestamp. Python startup remains in its own workload class; no guessed overhead is subtracted. [Methodology](docs/measurement.md).
 
-`microbox::run(config).await` returns a structured outcome with separate exit code and signal fields, termination reason, readiness state, observed resource counters, bounded output prefixes, output hashes and the final audit root. SIGSYS is reported as signal 31, not a synthesized shell exit code 159. A nonzero payload exit is still a successfully observed sandbox execution; callers must inspect the outcome.
+The initial v0.1 static-probe baseline measured 3.084 ms median parent-observed setup readiness on its shared CI runner. That historical result does not meet a 500-microsecond target. The v0.2 runner measured median CLI end-to-end times of **5.246 ms native**, **6.593 ms dynamically linked ls**, and **19.590 ms Python cold start** (30 samples per class). These include CLI/runtime and cleanup costs, not just isolation. [Raw v0.2 samples](benchmarks/baseline-v0.2-linux-x86_64.json) retain all measurements; these are shared-runner observations, not a latency guarantee.
 
-Dropping the async future requests cancellation. Its dedicated supervisor thread continues teardown; read the exclusive audit file for cancellation evidence. Abrupt termination of the entire host supervisor, kernel failure, and uninterruptible tasks are not covered by a zero-leak guarantee. Cleanup has a five-second deadline and surfaces failure instead of claiming success.
+Kernel exploits, hardware side channels, whole-host supervisor crashes, and uninterruptible kernel tasks remain outside the guarantee. CPU limits are bandwidth quotas, not instruction budgets; block-device I/O throttling and comprehensive syscall/file/packet tracing are not implemented. The rootfs and proxy are trusted inputs/components. General outbound TCP, arbitrary HTTP methods, ARM, rootless setup and cross-runtime performance comparisons are outside this release's scope.
 
-## Verification and measurement
+## Workspace
 
-The first recorded Linux run passed **9 unit tests and 16 real-kernel checks**. On a shared Xeon Platinum 8573C runner with Linux 6.17.0-1022-azure, 30 static-probe samples measured **3.084 ms median parent-observed setup readiness**, **3.842 ms median supervisor total**, and **5.914 ms median CLI end-to-end**. These are development baselines with scheduling/polling costs, not sub-millisecond or competitive claims. See [validation evidence](docs/validation.md) and [raw samples](benchmarks/baseline-linux-x86_64.json).
+| Crate | Responsibility |
+|---|---|
+| microbox-sys | Auditable namespace/mount/privilege wrappers and pure Rust seccomp builder |
+| microbox-helper | Single-threaded setup, PID 1 reaping and payload exec protocol |
+| microbox | Async API, cgroup lifecycle, bounded capture and audit verification |
+| microbox-cli | Configuration generation, execution and audit commands |
+| microbox-egress | Separately privileged HTTPS capability service |
 
-The real-kernel suite checks PID namespace entry, descriptor closure, read-only filesystems, bounded tmpfs, external network failure, kill/errno syscall policies, fork-bomb containment, group OOM handling, bounded output, async cancellation, exec failure reporting, and fail-closed preflight rejection. Every successful run is checked for cgroup removal and against its independently returned audit root.
+[Architecture](docs/architecture.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE)
 
-[Measurement methodology](docs/measurement.md) describes the timing boundaries. Setup-readiness is parent-observed and includes process launch, cgroup setup, IPC and polling delay. Ready-to-helper-exit includes exec and init reaping. Neither is a claim of exact execve timing. Comparative benchmarks, dynamic utilities, Python cold starts, and proxy-mediated egress remain future work.
-
-## Limits worth understanding
-
-This is a shared-kernel boundary. Kernel exploits and hardware side channels are outside scope. CPU quotas throttle time rather than guaranteeing instruction counts or instant interruption. Tmpfs limits bound scratch storage; block-device I/O throttling is not implemented. `/dev` and `/sys` are empty mounts; workloads requiring devices need a separately reviewed profile. The syscall profile targets the included native probes; arbitrary Python/Node workloads may require additional reviewed calls. No terminal, host filesystem bind mounts, environment forwarding, external network, or disk-persistent workload outputs are exposed.
-
-The hash chain authenticates collected metadata relative to an external root. It is not comprehensive syscall/file/packet tracing, hardware attestation, non-repudiation, or proof of non-compromise. [Architecture and trust model](docs/architecture.md).
-
-Prior art: [bubblewrap](https://github.com/containers/bubblewrap), [nsjail](https://github.com/google/nsjail), [gVisor](https://gvisor.dev/), and [Firecracker](https://firecracker-microvm.github.io/) are established alternatives with different boundaries. This project explores an embeddable Rust API and explicit lifecycle evidence; it does not claim to replace them or outperform them.
+Prior art includes [bubblewrap](https://github.com/containers/bubblewrap), [nsjail](https://github.com/google/nsjail), [gVisor](https://gvisor.dev/) and [Firecracker](https://firecracker-microvm.github.io/). microbox explores an embeddable Rust API and explicit lifecycle evidence; it does not claim to replace these established systems or outperform them.
