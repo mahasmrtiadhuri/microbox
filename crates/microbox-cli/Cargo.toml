@@ -1,0 +1,9 @@
+[package]
+name = "microbox-cli"
+version.workspace = true
+edition.workspace = true
+[dependencies]
+microbox.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
