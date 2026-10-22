@@ -91,6 +91,8 @@ Dropping the async future requests cancellation. Its dedicated supervisor thread
 
 ## Verification and measurement
 
+The first recorded Linux run passed **9 unit tests and 16 real-kernel checks**. On a shared Xeon Platinum 8573C runner with Linux 6.17.0-1022-azure, 30 static-probe samples measured **3.084 ms median parent-observed setup readiness**, **3.842 ms median supervisor total**, and **5.914 ms median CLI end-to-end**. These are development baselines with scheduling/polling costs, not sub-millisecond or competitive claims. See [validation evidence](docs/validation.md) and [raw samples](benchmarks/baseline-linux-x86_64.json).
+
 The real-kernel suite checks PID namespace entry, descriptor closure, read-only filesystems, bounded tmpfs, external network failure, kill/errno syscall policies, fork-bomb containment, group OOM handling, bounded output, async cancellation, exec failure reporting, and fail-closed preflight rejection. Every successful run is checked for cgroup removal and against its independently returned audit root.
 
 [Measurement methodology](docs/measurement.md) describes the timing boundaries. Setup-readiness is parent-observed and includes process launch, cgroup setup, IPC and polling delay. Ready-to-helper-exit includes exec and init reaping. Neither is a claim of exact execve timing. Comparative benchmarks, dynamic utilities, Python cold starts, and proxy-mediated egress remain future work.
