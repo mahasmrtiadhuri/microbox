@@ -1,0 +1,7 @@
+[package]
+name = "microbox-sys"
+version.workspace = true
+edition.workspace = true
+[dependencies]
+libc.workspace = true
+serde.workspace = true
