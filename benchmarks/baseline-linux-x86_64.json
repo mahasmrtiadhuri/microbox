@@ -1,0 +1,222 @@
+{
+  "kernel": "6.17.0-1022-azure",
+  "machine": "x86_64",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "cpu": "model name\t: INTEL(R) XEON(R) PLATINUM 8573C",
+  "cgroup_parent": "/sys/fs/cgroup/microbox-ci-39860905395-1",
+  "runs": 30,
+  "payload": "static C probe true",
+  "timing_note": "Parent-observed readiness includes helper launch, cgroup setup, IPC and poll scheduling. Ready-to-helper-exit includes exec and init reaping; not exact execve timing.",
+  "samples_us": [
+    {
+      "call_to_setup_ready": 7168,
+      "cleanup_and_capture": 145,
+      "ready_to_helper_exit": 1155,
+      "total": 8470,
+      "cli_end_to_end": 10714
+    },
+    {
+      "call_to_setup_ready": 4285,
+      "cleanup_and_capture": 131,
+      "ready_to_helper_exit": 81,
+      "total": 4498,
+      "cli_end_to_end": 6586
+    },
+    {
+      "call_to_setup_ready": 3128,
+      "cleanup_and_capture": 130,
+      "ready_to_helper_exit": 1155,
+      "total": 4414,
+      "cli_end_to_end": 6429
+    },
+    {
+      "call_to_setup_ready": 3193,
+      "cleanup_and_capture": 128,
+      "ready_to_helper_exit": 1142,
+      "total": 4464,
+      "cli_end_to_end": 6452
+    },
+    {
+      "call_to_setup_ready": 3074,
+      "cleanup_and_capture": 134,
+      "ready_to_helper_exit": 84,
+      "total": 3294,
+      "cli_end_to_end": 5254
+    },
+    {
+      "call_to_setup_ready": 3116,
+      "cleanup_and_capture": 161,
+      "ready_to_helper_exit": 86,
+      "total": 3363,
+      "cli_end_to_end": 5682
+    },
+    {
+      "call_to_setup_ready": 2779,
+      "cleanup_and_capture": 124,
+      "ready_to_helper_exit": 1149,
+      "total": 4053,
+      "cli_end_to_end": 5954
+    },
+    {
+      "call_to_setup_ready": 3550,
+      "cleanup_and_capture": 124,
+      "ready_to_helper_exit": 83,
+      "total": 3758,
+      "cli_end_to_end": 5666
+    },
+    {
+      "call_to_setup_ready": 3032,
+      "cleanup_and_capture": 130,
+      "ready_to_helper_exit": 80,
+      "total": 3243,
+      "cli_end_to_end": 5180
+    },
+    {
+      "call_to_setup_ready": 3078,
+      "cleanup_and_capture": 434,
+      "ready_to_helper_exit": 80,
+      "total": 3594,
+      "cli_end_to_end": 5527
+    },
+    {
+      "call_to_setup_ready": 3034,
+      "cleanup_and_capture": 122,
+      "ready_to_helper_exit": 85,
+      "total": 3241,
+      "cli_end_to_end": 6066
+    },
+    {
+      "call_to_setup_ready": 3158,
+      "cleanup_and_capture": 120,
+      "ready_to_helper_exit": 79,
+      "total": 3358,
+      "cli_end_to_end": 5320
+    },
+    {
+      "call_to_setup_ready": 3084,
+      "cleanup_and_capture": 124,
+      "ready_to_helper_exit": 1149,
+      "total": 4358,
+      "cli_end_to_end": 6217
+    },
+    {
+      "call_to_setup_ready": 3027,
+      "cleanup_and_capture": 276,
+      "ready_to_helper_exit": 82,
+      "total": 3386,
+      "cli_end_to_end": 5230
+    },
+    {
+      "call_to_setup_ready": 4123,
+      "cleanup_and_capture": 94,
+      "ready_to_helper_exit": 61,
+      "total": 4279,
+      "cli_end_to_end": 6587
+    },
+    {
+      "call_to_setup_ready": 5818,
+      "cleanup_and_capture": 95,
+      "ready_to_helper_exit": 2192,
+      "total": 8105,
+      "cli_end_to_end": 9602
+    },
+    {
+      "call_to_setup_ready": 2924,
+      "cleanup_and_capture": 126,
+      "ready_to_helper_exit": 66,
+      "total": 3116,
+      "cli_end_to_end": 4874
+    },
+    {
+      "call_to_setup_ready": 3039,
+      "cleanup_and_capture": 120,
+      "ready_to_helper_exit": 131,
+      "total": 3291,
+      "cli_end_to_end": 5128
+    },
+    {
+      "call_to_setup_ready": 2994,
+      "cleanup_and_capture": 124,
+      "ready_to_helper_exit": 1144,
+      "total": 4263,
+      "cli_end_to_end": 6195
+    },
+    {
+      "call_to_setup_ready": 3036,
+      "cleanup_and_capture": 125,
+      "ready_to_helper_exit": 1144,
+      "total": 4306,
+      "cli_end_to_end": 6132
+    },
+    {
+      "call_to_setup_ready": 3021,
+      "cleanup_and_capture": 120,
+      "ready_to_helper_exit": 86,
+      "total": 3228,
+      "cli_end_to_end": 5366
+    },
+    {
+      "call_to_setup_ready": 3621,
+      "cleanup_and_capture": 131,
+      "ready_to_helper_exit": 81,
+      "total": 3834,
+      "cli_end_to_end": 5649
+    },
+    {
+      "call_to_setup_ready": 3084,
+      "cleanup_and_capture": 119,
+      "ready_to_helper_exit": 1148,
+      "total": 4352,
+      "cli_end_to_end": 6226
+    },
+    {
+      "call_to_setup_ready": 3096,
+      "cleanup_and_capture": 109,
+      "ready_to_helper_exit": 77,
+      "total": 3282,
+      "cli_end_to_end": 5325
+    },
+    {
+      "call_to_setup_ready": 2965,
+      "cleanup_and_capture": 94,
+      "ready_to_helper_exit": 80,
+      "total": 3140,
+      "cli_end_to_end": 4979
+    },
+    {
+      "call_to_setup_ready": 2826,
+      "cleanup_and_capture": 217,
+      "ready_to_helper_exit": 1128,
+      "total": 4172,
+      "cli_end_to_end": 5873
+    },
+    {
+      "call_to_setup_ready": 6789,
+      "cleanup_and_capture": 98,
+      "ready_to_helper_exit": 1126,
+      "total": 8014,
+      "cli_end_to_end": 9606
+    },
+    {
+      "call_to_setup_ready": 2623,
+      "cleanup_and_capture": 103,
+      "ready_to_helper_exit": 1123,
+      "total": 3850,
+      "cli_end_to_end": 6787
+    },
+    {
+      "call_to_setup_ready": 7819,
+      "cleanup_and_capture": 94,
+      "ready_to_helper_exit": 61,
+      "total": 7975,
+      "cli_end_to_end": 9459
+    },
+    {
+      "call_to_setup_ready": 3100,
+      "cleanup_and_capture": 94,
+      "ready_to_helper_exit": 59,
+      "total": 3254,
+      "cli_end_to_end": 4688
+    }
+  ]
+}
