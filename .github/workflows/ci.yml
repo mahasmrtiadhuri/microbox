@@ -1,30 +1,25 @@
-name: Validate packaged microbox
-on:
-  push:
-    paths: [microbox-source.tar.gz, .github/workflows/bootstrap.yml]
+name: Verify microbox
+on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
-  validate:
+  unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
-      - run: tar -xzf microbox-source.tar.gz
-      - run: cargo fmt --all
-      - run: cargo generate-lockfile
-      - uses: actions/upload-artifact@v4
-        with:
-          name: formatted-workspace
-          path: |
-            Cargo.lock
-            crates/
+      - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo test --workspace --locked
+  linux-adversarial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
       - run: cargo build --release --workspace --locked
-      - name: Exercise real kernel isolation
+      - name: Run against real Linux isolation primitives
         run: |
           cg="/sys/fs/cgroup/microbox-ci-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           root="$RUNNER_TEMP/microbox-root"
