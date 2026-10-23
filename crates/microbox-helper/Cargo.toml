@@ -2,6 +2,8 @@
 name = "microbox-helper"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
+repository.workspace = true
 [dependencies]
 microbox-sys.workspace = true
 libc.workspace = true
