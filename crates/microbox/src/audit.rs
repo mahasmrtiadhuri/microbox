@@ -49,18 +49,37 @@ impl<W: Write> Chain<W> {
         hex::encode(self.root)
     }
 }
-pub fn verify(reader: impl BufRead, expected_root: &str) -> Result<u64> {
+pub fn verify(mut reader: impl BufRead, expected_root: &str) -> Result<u64> {
     if expected_root.len() != 64 {
         bail!("a separately retained 32-byte root is required")
     };
     let mut root = [0; 32];
     let mut count = 0;
-    for line in reader.lines() {
-        let line = line?;
-        if line.len() > 1024 * 1024 {
-            bail!("oversized audit record")
-        };
-        let r: Record = serde_json::from_str(&line)?;
+    loop {
+        let mut line = Vec::new();
+        loop {
+            let available = reader.fill_buf()?;
+            if available.is_empty() {
+                if line.is_empty() {
+                    break;
+                }
+                bail!("incomplete audit record")
+            }
+            let end = available.iter().position(|b| *b == b'\n');
+            let take = end.map_or(available.len(), |n| n + 1);
+            if line.len() + take > 1024 * 1024 {
+                bail!("oversized audit record")
+            }
+            line.extend_from_slice(&available[..take]);
+            reader.consume(take);
+            if end.is_some() {
+                break;
+            }
+        }
+        if line.is_empty() {
+            break;
+        }
+        let r: Record = serde_json::from_slice(&line)?;
         if r.sequence != count {
             bail!("sequence mismatch")
         };
@@ -92,6 +111,21 @@ mod tests {
         let i = changed.iter().position(|b| *b == b'a').unwrap();
         changed[i] = b'x';
         assert!(verify(&changed[..], &root).is_err());
+    }
+    #[test]
+    fn oversized_record_is_bounded_before_parsing() {
+        let bytes = vec![b'x'; 2 * 1024 * 1024];
+        let error = verify(&bytes[..], &"00".repeat(32)).unwrap_err();
+        assert!(error.to_string().contains("oversized"));
+    }
+    #[test]
+    fn truncated_record_delimiter_is_rejected() {
+        let mut bytes = Vec::new();
+        let mut chain = Chain::new(&mut bytes);
+        chain.append(serde_json::json!({"done":true})).unwrap();
+        let root = chain.root();
+        bytes.pop();
+        assert!(verify(&bytes[..], &root).is_err());
     }
     #[test]
     fn requires_external_anchor() {
