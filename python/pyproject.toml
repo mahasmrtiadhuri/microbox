@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "microbox-fetch"
+version = "0.2.0"
+description = "Bounded HTTPS capability client for the microbox Linux sandbox"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = []
+
+[tool.setuptools]
+py-modules = ["microbox_fetch"]

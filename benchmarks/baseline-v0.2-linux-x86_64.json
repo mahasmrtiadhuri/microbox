@@ -1,0 +1,735 @@
+{
+  "schema": 2,
+  "kernel": "6.17.0-1022-azure",
+  "machine": "x86_64",
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "cpu": "model name\t: AMD EPYC 9V45 96-Core Processor",
+  "cgroup_parent": "/sys/fs/cgroup/microbox-ci-39871264562-1",
+  "runs_per_class": 30,
+  "timing_note": "Parent-observed readiness includes helper launch, cgroup setup, IPC and polling; ready-to-helper-exit includes exec, workload and init reaping. Python startup is retained in its own class.",
+  "payloads": {
+    "static-native": {
+      "argv": [
+        "/bin/probe",
+        "true"
+      ],
+      "samples_us": [
+        {
+          "call_to_setup_ready": 5660,
+          "cleanup_and_capture": 196,
+          "ready_to_helper_exit": 114,
+          "total": 5972,
+          "cli_end_to_end": 8190
+        },
+        {
+          "call_to_setup_ready": 3073,
+          "cleanup_and_capture": 138,
+          "ready_to_helper_exit": 121,
+          "total": 3334,
+          "cli_end_to_end": 5262
+        },
+        {
+          "call_to_setup_ready": 4939,
+          "cleanup_and_capture": 137,
+          "ready_to_helper_exit": 98,
+          "total": 5174,
+          "cli_end_to_end": 7000
+        },
+        {
+          "call_to_setup_ready": 3111,
+          "cleanup_and_capture": 168,
+          "ready_to_helper_exit": 99,
+          "total": 3378,
+          "cli_end_to_end": 5219
+        },
+        {
+          "call_to_setup_ready": 3066,
+          "cleanup_and_capture": 152,
+          "ready_to_helper_exit": 1160,
+          "total": 4379,
+          "cli_end_to_end": 6756
+        },
+        {
+          "call_to_setup_ready": 5551,
+          "cleanup_and_capture": 143,
+          "ready_to_helper_exit": 100,
+          "total": 5795,
+          "cli_end_to_end": 7882
+        },
+        {
+          "call_to_setup_ready": 3112,
+          "cleanup_and_capture": 203,
+          "ready_to_helper_exit": 1232,
+          "total": 4548,
+          "cli_end_to_end": 6644
+        },
+        {
+          "call_to_setup_ready": 3086,
+          "cleanup_and_capture": 144,
+          "ready_to_helper_exit": 94,
+          "total": 3325,
+          "cli_end_to_end": 5150
+        },
+        {
+          "call_to_setup_ready": 3060,
+          "cleanup_and_capture": 139,
+          "ready_to_helper_exit": 108,
+          "total": 3308,
+          "cli_end_to_end": 5197
+        },
+        {
+          "call_to_setup_ready": 3043,
+          "cleanup_and_capture": 185,
+          "ready_to_helper_exit": 96,
+          "total": 3324,
+          "cli_end_to_end": 5229
+        },
+        {
+          "call_to_setup_ready": 3031,
+          "cleanup_and_capture": 133,
+          "ready_to_helper_exit": 97,
+          "total": 3261,
+          "cli_end_to_end": 5101
+        },
+        {
+          "call_to_setup_ready": 3050,
+          "cleanup_and_capture": 146,
+          "ready_to_helper_exit": 101,
+          "total": 3298,
+          "cli_end_to_end": 5176
+        },
+        {
+          "call_to_setup_ready": 3057,
+          "cleanup_and_capture": 134,
+          "ready_to_helper_exit": 94,
+          "total": 3286,
+          "cli_end_to_end": 5126
+        },
+        {
+          "call_to_setup_ready": 3057,
+          "cleanup_and_capture": 131,
+          "ready_to_helper_exit": 113,
+          "total": 3302,
+          "cli_end_to_end": 5103
+        },
+        {
+          "call_to_setup_ready": 3225,
+          "cleanup_and_capture": 150,
+          "ready_to_helper_exit": 96,
+          "total": 3473,
+          "cli_end_to_end": 5612
+        },
+        {
+          "call_to_setup_ready": 3043,
+          "cleanup_and_capture": 129,
+          "ready_to_helper_exit": 96,
+          "total": 3269,
+          "cli_end_to_end": 5192
+        },
+        {
+          "call_to_setup_ready": 3065,
+          "cleanup_and_capture": 133,
+          "ready_to_helper_exit": 99,
+          "total": 3298,
+          "cli_end_to_end": 5157
+        },
+        {
+          "call_to_setup_ready": 3034,
+          "cleanup_and_capture": 129,
+          "ready_to_helper_exit": 94,
+          "total": 3258,
+          "cli_end_to_end": 5135
+        },
+        {
+          "call_to_setup_ready": 3112,
+          "cleanup_and_capture": 137,
+          "ready_to_helper_exit": 100,
+          "total": 3350,
+          "cli_end_to_end": 5164
+        },
+        {
+          "call_to_setup_ready": 5297,
+          "cleanup_and_capture": 1658,
+          "ready_to_helper_exit": 103,
+          "total": 7059,
+          "cli_end_to_end": 9598
+        },
+        {
+          "call_to_setup_ready": 3184,
+          "cleanup_and_capture": 148,
+          "ready_to_helper_exit": 1183,
+          "total": 4516,
+          "cli_end_to_end": 7456
+        },
+        {
+          "call_to_setup_ready": 6443,
+          "cleanup_and_capture": 141,
+          "ready_to_helper_exit": 102,
+          "total": 6687,
+          "cli_end_to_end": 8629
+        },
+        {
+          "call_to_setup_ready": 3064,
+          "cleanup_and_capture": 133,
+          "ready_to_helper_exit": 293,
+          "total": 3490,
+          "cli_end_to_end": 5418
+        },
+        {
+          "call_to_setup_ready": 3077,
+          "cleanup_and_capture": 134,
+          "ready_to_helper_exit": 97,
+          "total": 3309,
+          "cli_end_to_end": 5228
+        },
+        {
+          "call_to_setup_ready": 3035,
+          "cleanup_and_capture": 134,
+          "ready_to_helper_exit": 97,
+          "total": 3267,
+          "cli_end_to_end": 5089
+        },
+        {
+          "call_to_setup_ready": 3201,
+          "cleanup_and_capture": 152,
+          "ready_to_helper_exit": 98,
+          "total": 3452,
+          "cli_end_to_end": 5307
+        },
+        {
+          "call_to_setup_ready": 3087,
+          "cleanup_and_capture": 129,
+          "ready_to_helper_exit": 98,
+          "total": 3315,
+          "cli_end_to_end": 5197
+        },
+        {
+          "call_to_setup_ready": 4237,
+          "cleanup_and_capture": 132,
+          "ready_to_helper_exit": 98,
+          "total": 4467,
+          "cli_end_to_end": 6722
+        },
+        {
+          "call_to_setup_ready": 3477,
+          "cleanup_and_capture": 138,
+          "ready_to_helper_exit": 107,
+          "total": 3722,
+          "cli_end_to_end": 5540
+        },
+        {
+          "call_to_setup_ready": 3122,
+          "cleanup_and_capture": 194,
+          "ready_to_helper_exit": 126,
+          "total": 3443,
+          "cli_end_to_end": 5495
+        }
+      ],
+      "summary_us": {
+        "call_to_setup_ready": {
+          "median": 3086.5,
+          "maximum": 6443
+        },
+        "cleanup_and_capture": {
+          "median": 138.5,
+          "maximum": 1658
+        },
+        "ready_to_helper_exit": {
+          "median": 99.5,
+          "maximum": 1232
+        },
+        "total": {
+          "median": 3364.0,
+          "maximum": 7059
+        },
+        "cli_end_to_end": {
+          "median": 5245.5,
+          "maximum": 9598
+        }
+      }
+    },
+    "dynamic-ls": {
+      "argv": [
+        "/bin/ls",
+        "/"
+      ],
+      "samples_us": [
+        {
+          "call_to_setup_ready": 3058,
+          "cleanup_and_capture": 142,
+          "ready_to_helper_exit": 1165,
+          "total": 4365,
+          "cli_end_to_end": 6294
+        },
+        {
+          "call_to_setup_ready": 9005,
+          "cleanup_and_capture": 149,
+          "ready_to_helper_exit": 1180,
+          "total": 10335,
+          "cli_end_to_end": 12361
+        },
+        {
+          "call_to_setup_ready": 3108,
+          "cleanup_and_capture": 151,
+          "ready_to_helper_exit": 1197,
+          "total": 4456,
+          "cli_end_to_end": 6534
+        },
+        {
+          "call_to_setup_ready": 3169,
+          "cleanup_and_capture": 148,
+          "ready_to_helper_exit": 1173,
+          "total": 4491,
+          "cli_end_to_end": 6615
+        },
+        {
+          "call_to_setup_ready": 3207,
+          "cleanup_and_capture": 136,
+          "ready_to_helper_exit": 1178,
+          "total": 4522,
+          "cli_end_to_end": 6591
+        },
+        {
+          "call_to_setup_ready": 5566,
+          "cleanup_and_capture": 143,
+          "ready_to_helper_exit": 1171,
+          "total": 6881,
+          "cli_end_to_end": 8889
+        },
+        {
+          "call_to_setup_ready": 3090,
+          "cleanup_and_capture": 172,
+          "ready_to_helper_exit": 1180,
+          "total": 4443,
+          "cli_end_to_end": 7646
+        },
+        {
+          "call_to_setup_ready": 7900,
+          "cleanup_and_capture": 146,
+          "ready_to_helper_exit": 1184,
+          "total": 9231,
+          "cli_end_to_end": 11420
+        },
+        {
+          "call_to_setup_ready": 3276,
+          "cleanup_and_capture": 146,
+          "ready_to_helper_exit": 1163,
+          "total": 4585,
+          "cli_end_to_end": 6559
+        },
+        {
+          "call_to_setup_ready": 3071,
+          "cleanup_and_capture": 208,
+          "ready_to_helper_exit": 1198,
+          "total": 4478,
+          "cli_end_to_end": 6492
+        },
+        {
+          "call_to_setup_ready": 3172,
+          "cleanup_and_capture": 171,
+          "ready_to_helper_exit": 1204,
+          "total": 4548,
+          "cli_end_to_end": 6562
+        },
+        {
+          "call_to_setup_ready": 5902,
+          "cleanup_and_capture": 140,
+          "ready_to_helper_exit": 122,
+          "total": 6164,
+          "cli_end_to_end": 8077
+        },
+        {
+          "call_to_setup_ready": 3039,
+          "cleanup_and_capture": 139,
+          "ready_to_helper_exit": 1183,
+          "total": 4362,
+          "cli_end_to_end": 6384
+        },
+        {
+          "call_to_setup_ready": 3049,
+          "cleanup_and_capture": 148,
+          "ready_to_helper_exit": 1173,
+          "total": 4370,
+          "cli_end_to_end": 6202
+        },
+        {
+          "call_to_setup_ready": 3253,
+          "cleanup_and_capture": 149,
+          "ready_to_helper_exit": 106,
+          "total": 3508,
+          "cli_end_to_end": 5453
+        },
+        {
+          "call_to_setup_ready": 3046,
+          "cleanup_and_capture": 139,
+          "ready_to_helper_exit": 1172,
+          "total": 4358,
+          "cli_end_to_end": 6350
+        },
+        {
+          "call_to_setup_ready": 5557,
+          "cleanup_and_capture": 141,
+          "ready_to_helper_exit": 115,
+          "total": 5813,
+          "cli_end_to_end": 8259
+        },
+        {
+          "call_to_setup_ready": 3109,
+          "cleanup_and_capture": 143,
+          "ready_to_helper_exit": 1164,
+          "total": 4417,
+          "cli_end_to_end": 6715
+        },
+        {
+          "call_to_setup_ready": 7836,
+          "cleanup_and_capture": 155,
+          "ready_to_helper_exit": 1191,
+          "total": 9182,
+          "cli_end_to_end": 11193
+        },
+        {
+          "call_to_setup_ready": 3244,
+          "cleanup_and_capture": 208,
+          "ready_to_helper_exit": 1165,
+          "total": 4617,
+          "cli_end_to_end": 6843
+        },
+        {
+          "call_to_setup_ready": 7769,
+          "cleanup_and_capture": 154,
+          "ready_to_helper_exit": 1188,
+          "total": 9112,
+          "cli_end_to_end": 11295
+        },
+        {
+          "call_to_setup_ready": 6073,
+          "cleanup_and_capture": 153,
+          "ready_to_helper_exit": 1184,
+          "total": 7411,
+          "cli_end_to_end": 9601
+        },
+        {
+          "call_to_setup_ready": 3182,
+          "cleanup_and_capture": 140,
+          "ready_to_helper_exit": 1176,
+          "total": 4498,
+          "cli_end_to_end": 6594
+        },
+        {
+          "call_to_setup_ready": 4332,
+          "cleanup_and_capture": 143,
+          "ready_to_helper_exit": 110,
+          "total": 4586,
+          "cli_end_to_end": 6581
+        },
+        {
+          "call_to_setup_ready": 3122,
+          "cleanup_and_capture": 144,
+          "ready_to_helper_exit": 1188,
+          "total": 4455,
+          "cli_end_to_end": 6340
+        },
+        {
+          "call_to_setup_ready": 3083,
+          "cleanup_and_capture": 159,
+          "ready_to_helper_exit": 1167,
+          "total": 4410,
+          "cli_end_to_end": 6391
+        },
+        {
+          "call_to_setup_ready": 3165,
+          "cleanup_and_capture": 137,
+          "ready_to_helper_exit": 1163,
+          "total": 4466,
+          "cli_end_to_end": 6609
+        },
+        {
+          "call_to_setup_ready": 7726,
+          "cleanup_and_capture": 141,
+          "ready_to_helper_exit": 1177,
+          "total": 9045,
+          "cli_end_to_end": 11125
+        },
+        {
+          "call_to_setup_ready": 3088,
+          "cleanup_and_capture": 140,
+          "ready_to_helper_exit": 1161,
+          "total": 4389,
+          "cli_end_to_end": 6492
+        },
+        {
+          "call_to_setup_ready": 3108,
+          "cleanup_and_capture": 229,
+          "ready_to_helper_exit": 1186,
+          "total": 4524,
+          "cli_end_to_end": 6521
+        }
+      ],
+      "summary_us": {
+        "call_to_setup_ready": {
+          "median": 3177.0,
+          "maximum": 9005
+        },
+        "cleanup_and_capture": {
+          "median": 146.0,
+          "maximum": 229
+        },
+        "ready_to_helper_exit": {
+          "median": 1174.5,
+          "maximum": 1204
+        },
+        "total": {
+          "median": 4510.0,
+          "maximum": 10335
+        },
+        "cli_end_to_end": {
+          "median": 6592.5,
+          "maximum": 12361
+        }
+      }
+    },
+    "python-cold": {
+      "argv": [
+        "/usr/bin/python3",
+        "-I",
+        "-c",
+        "pass"
+      ],
+      "samples_us": [
+        {
+          "call_to_setup_ready": 3116,
+          "cleanup_and_capture": 195,
+          "ready_to_helper_exit": 11860,
+          "total": 15171,
+          "cli_end_to_end": 17223
+        },
+        {
+          "call_to_setup_ready": 7064,
+          "cleanup_and_capture": 180,
+          "ready_to_helper_exit": 11796,
+          "total": 19041,
+          "cli_end_to_end": 21546
+        },
+        {
+          "call_to_setup_ready": 6216,
+          "cleanup_and_capture": 177,
+          "ready_to_helper_exit": 11780,
+          "total": 18173,
+          "cli_end_to_end": 20459
+        },
+        {
+          "call_to_setup_ready": 5398,
+          "cleanup_and_capture": 175,
+          "ready_to_helper_exit": 11772,
+          "total": 17345,
+          "cli_end_to_end": 19614
+        },
+        {
+          "call_to_setup_ready": 5377,
+          "cleanup_and_capture": 236,
+          "ready_to_helper_exit": 10736,
+          "total": 16350,
+          "cli_end_to_end": 18611
+        },
+        {
+          "call_to_setup_ready": 6206,
+          "cleanup_and_capture": 220,
+          "ready_to_helper_exit": 10720,
+          "total": 17146,
+          "cli_end_to_end": 19452
+        },
+        {
+          "call_to_setup_ready": 6347,
+          "cleanup_and_capture": 193,
+          "ready_to_helper_exit": 10733,
+          "total": 17274,
+          "cli_end_to_end": 19524
+        },
+        {
+          "call_to_setup_ready": 5616,
+          "cleanup_and_capture": 174,
+          "ready_to_helper_exit": 10664,
+          "total": 16455,
+          "cli_end_to_end": 18718
+        },
+        {
+          "call_to_setup_ready": 7197,
+          "cleanup_and_capture": 169,
+          "ready_to_helper_exit": 10730,
+          "total": 18097,
+          "cli_end_to_end": 20367
+        },
+        {
+          "call_to_setup_ready": 5416,
+          "cleanup_and_capture": 197,
+          "ready_to_helper_exit": 10731,
+          "total": 16344,
+          "cli_end_to_end": 18628
+        },
+        {
+          "call_to_setup_ready": 7351,
+          "cleanup_and_capture": 179,
+          "ready_to_helper_exit": 10720,
+          "total": 18251,
+          "cli_end_to_end": 20507
+        },
+        {
+          "call_to_setup_ready": 6391,
+          "cleanup_and_capture": 215,
+          "ready_to_helper_exit": 10761,
+          "total": 17367,
+          "cli_end_to_end": 19651
+        },
+        {
+          "call_to_setup_ready": 6251,
+          "cleanup_and_capture": 228,
+          "ready_to_helper_exit": 10734,
+          "total": 17214,
+          "cli_end_to_end": 19519
+        },
+        {
+          "call_to_setup_ready": 5375,
+          "cleanup_and_capture": 171,
+          "ready_to_helper_exit": 10751,
+          "total": 16298,
+          "cli_end_to_end": 18540
+        },
+        {
+          "call_to_setup_ready": 5031,
+          "cleanup_and_capture": 174,
+          "ready_to_helper_exit": 11788,
+          "total": 16993,
+          "cli_end_to_end": 19258
+        },
+        {
+          "call_to_setup_ready": 6630,
+          "cleanup_and_capture": 181,
+          "ready_to_helper_exit": 10818,
+          "total": 17630,
+          "cli_end_to_end": 19906
+        },
+        {
+          "call_to_setup_ready": 6242,
+          "cleanup_and_capture": 222,
+          "ready_to_helper_exit": 10736,
+          "total": 17201,
+          "cli_end_to_end": 19566
+        },
+        {
+          "call_to_setup_ready": 5345,
+          "cleanup_and_capture": 188,
+          "ready_to_helper_exit": 10724,
+          "total": 16258,
+          "cli_end_to_end": 18474
+        },
+        {
+          "call_to_setup_ready": 5442,
+          "cleanup_and_capture": 174,
+          "ready_to_helper_exit": 10723,
+          "total": 16341,
+          "cli_end_to_end": 18596
+        },
+        {
+          "call_to_setup_ready": 5425,
+          "cleanup_and_capture": 170,
+          "ready_to_helper_exit": 10714,
+          "total": 16310,
+          "cli_end_to_end": 18622
+        },
+        {
+          "call_to_setup_ready": 5388,
+          "cleanup_and_capture": 203,
+          "ready_to_helper_exit": 10740,
+          "total": 16332,
+          "cli_end_to_end": 18614
+        },
+        {
+          "call_to_setup_ready": 6874,
+          "cleanup_and_capture": 172,
+          "ready_to_helper_exit": 10787,
+          "total": 17834,
+          "cli_end_to_end": 20145
+        },
+        {
+          "call_to_setup_ready": 6620,
+          "cleanup_and_capture": 168,
+          "ready_to_helper_exit": 10781,
+          "total": 17570,
+          "cli_end_to_end": 19835
+        },
+        {
+          "call_to_setup_ready": 6368,
+          "cleanup_and_capture": 176,
+          "ready_to_helper_exit": 11781,
+          "total": 18326,
+          "cli_end_to_end": 20566
+        },
+        {
+          "call_to_setup_ready": 7179,
+          "cleanup_and_capture": 178,
+          "ready_to_helper_exit": 11896,
+          "total": 19254,
+          "cli_end_to_end": 21526
+        },
+        {
+          "call_to_setup_ready": 6495,
+          "cleanup_and_capture": 235,
+          "ready_to_helper_exit": 10767,
+          "total": 17498,
+          "cli_end_to_end": 19777
+        },
+        {
+          "call_to_setup_ready": 6105,
+          "cleanup_and_capture": 219,
+          "ready_to_helper_exit": 10731,
+          "total": 17055,
+          "cli_end_to_end": 19363
+        },
+        {
+          "call_to_setup_ready": 6321,
+          "cleanup_and_capture": 252,
+          "ready_to_helper_exit": 10719,
+          "total": 17292,
+          "cli_end_to_end": 19675
+        },
+        {
+          "call_to_setup_ready": 5604,
+          "cleanup_and_capture": 219,
+          "ready_to_helper_exit": 10856,
+          "total": 16679,
+          "cli_end_to_end": 20643
+        },
+        {
+          "call_to_setup_ready": 6081,
+          "cleanup_and_capture": 181,
+          "ready_to_helper_exit": 13145,
+          "total": 19408,
+          "cli_end_to_end": 21733
+        }
+      ],
+      "summary_us": {
+        "call_to_setup_ready": {
+          "median": 6211.0,
+          "maximum": 7351
+        },
+        "cleanup_and_capture": {
+          "median": 181.0,
+          "maximum": 252
+        },
+        "ready_to_helper_exit": {
+          "median": 10745.5,
+          "maximum": 13145
+        },
+        "total": {
+          "median": 17244.0,
+          "maximum": 19408
+        },
+        "cli_end_to_end": {
+          "median": 19590.0,
+          "maximum": 21733
+        }
+      }
+    }
+  },
+  "validation_run": "https://github.com/mahasmrtiadhuri/microbox/actions/runs/39871264562"
+}

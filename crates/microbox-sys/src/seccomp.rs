@@ -30,7 +30,8 @@ pub fn compile(mode: DenyMode) -> Vec<libc::sock_filter> {
         ins(RET, 0, 0, ERRNO | libc::ENOSYS as u32),
     ]);
     // clone: only ordinary process/thread creation flags; reject namespace and parent-changing flags.
-    let safe = libc::CLONE_VM
+    let safe = libc::CLONE_VFORK
+        | libc::CLONE_VM
         | libc::CLONE_FS
         | libc::CLONE_FILES
         | libc::CLONE_SIGHAND
@@ -60,6 +61,9 @@ pub fn compile(mode: DenyMode) -> Vec<libc::sock_filter> {
         libc::SYS_close,
         libc::SYS_close_range,
         libc::SYS_fstat,
+        // Read-only filesystem metadata, including libselinux detection in dynamic tools.
+        libc::SYS_statfs,
+        libc::SYS_fstatfs,
         libc::SYS_newfstatat,
         libc::SYS_stat,
         libc::SYS_lstat,

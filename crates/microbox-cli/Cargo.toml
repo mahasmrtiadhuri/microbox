@@ -2,6 +2,8 @@
 name = "microbox-cli"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
+repository.workspace = true
 [dependencies]
 microbox.workspace = true
 serde_json.workspace = true

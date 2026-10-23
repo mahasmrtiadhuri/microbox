@@ -3,14 +3,14 @@
 pub mod audit;
 mod cgroup;
 use anyhow::{bail, Context, Result};
-pub use microbox_sys::DenyMode;
+pub use microbox_sys::{DenyMode, Network};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     io::{BufRead, BufReader, Read, Write},
     os::fd::{AsRawFd, FromRawFd},
     os::unix::{
-        fs::{MetadataExt, OpenOptionsExt},
+        fs::{FileTypeExt, MetadataExt, OpenOptionsExt},
         net::UnixStream,
         process::CommandExt,
     },
@@ -51,6 +51,8 @@ pub struct Config {
     pub timeout_ms: u64,
     pub output_limit_bytes: usize,
     pub deny_mode: DenyMode,
+    #[serde(default)]
+    pub network: Network,
 }
 impl Config {
     pub fn validate(&self) -> Result<()> {
@@ -107,7 +109,59 @@ impl Config {
         {
             bail!("canonical cgroup delegation path required")
         }
+        if let Network::HttpsFetch { socket } = &self.network {
+            let socket_path = PathBuf::from(socket);
+            if !socket_path.is_absolute() || socket_path.canonicalize()? != socket_path {
+                bail!("canonical proxy socket path required")
+            }
+            let m = std::fs::symlink_metadata(&socket_path)?;
+            let parent = std::fs::symlink_metadata(socket_path.parent().context("socket parent")?)?;
+            if !m.file_type().is_socket()
+                || ![0, 65533].contains(&m.uid())
+                || !parent.is_dir()
+                || ![0, 65533].contains(&parent.uid())
+                || parent.mode() & 0o077 != 0
+            {
+                bail!("proxy socket requires a trusted private host directory and dedicated proxy owner")
+            }
+            for rel in [".microbox-egress", ".microbox-egress/fetch.sock"] {
+                let m = std::fs::symlink_metadata(root.join(rel))?;
+                if m.uid() != 0
+                    || m.mode() & 0o022 != 0
+                    || m.file_type().is_symlink()
+                    || (rel.ends_with("fetch.sock") && (!m.is_file() || m.len() != 0))
+                    || (!rel.ends_with("fetch.sock") && !m.is_dir())
+                {
+                    bail!("invalid reserved rootfs proxy mountpoint")
+                }
+            }
+        }
         Ok(())
+    }
+}
+impl Config {
+    pub fn new(
+        rootfs: PathBuf,
+        helper: PathBuf,
+        cgroup_parent: PathBuf,
+        audit_path: PathBuf,
+        argv: Vec<String>,
+    ) -> Self {
+        Self {
+            rootfs,
+            helper,
+            cgroup_parent,
+            audit_path,
+            argv,
+            memory_bytes: 128 * 1024 * 1024,
+            tmp_bytes: 16 * 1024 * 1024,
+            pids: 64,
+            cpu_quota_us: 50000,
+            timeout_ms: 5000,
+            output_limit_bytes: 65536,
+            deny_mode: DenyMode::Kill,
+            network: Network::Airgap,
+        }
     }
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -161,11 +215,32 @@ fn capture<R: Read + Send + 'static>(
         })
     })
 }
-struct ChildGuard(Child);
+struct ChildGuard(Option<Child>);
+impl std::ops::Deref for ChildGuard {
+    type Target = Child;
+    fn deref(&self) -> &Child {
+        self.0.as_ref().unwrap()
+    }
+}
+impl std::ops::DerefMut for ChildGuard {
+    fn deref_mut(&mut self) -> &mut Child {
+        self.0.as_mut().unwrap()
+    }
+}
 impl Drop for ChildGuard {
     fn drop(&mut self) {
-        let _ = self.0.kill();
-        let _ = self.0.wait();
+        if let Some(mut child) = self.0.take() {
+            if matches!(child.try_wait(), Ok(Some(_))) {
+                return;
+            }
+            let _ = child.kill();
+            // Never block an error return indefinitely on an uninterruptible task.
+            let _ = std::thread::Builder::new()
+                .name("microbox-reaper".into())
+                .spawn(move || {
+                    let _ = child.wait();
+                });
+        }
     }
 }
 /// Dropping this future requests cancellation. A dedicated supervisor thread still performs teardown.
@@ -207,6 +282,7 @@ fn supervise(
         argv: config.argv.clone(),
         tmp_bytes: config.tmp_bytes,
         mode: config.deny_mode,
+        network: config.network.clone(),
     };
     let input = serde_json::to_vec(&setup)?;
     if input.len() > 65536 {
@@ -235,18 +311,18 @@ fn supervise(
             }
         });
     }
-    let mut child = ChildGuard(cmd.spawn().context("launch setup helper")?);
+    let mut child = ChildGuard(Some(cmd.spawn().context("launch setup helper")?));
     drop(handoff);
     // Enroll while the helper is still blocked on stdin, before any unshare or fork.
-    std::fs::write(group.path.join("cgroup.procs"), child.0.id().to_string())?;
+    std::fs::write(group.path.join("cgroup.procs"), child.id().to_string())?;
     let exceeded = Arc::new(AtomicBool::new(false));
     let out = capture(
-        child.0.stdout.take().unwrap(),
+        child.stdout.take().unwrap(),
         config.output_limit_bytes,
         exceeded.clone(),
     );
     let err = capture(
-        child.0.stderr.take().unwrap(),
+        child.stderr.take().unwrap(),
         config.output_limit_bytes,
         exceeded.clone(),
     );
@@ -258,9 +334,8 @@ fn supervise(
         }
         Ok(())
     });
-    if let Err(e) = child.0.stdin.take().unwrap().write_all(&input) {
+    if let Err(e) = child.stdin.take().unwrap().write_all(&input) {
         group.kill()?;
-        child.0.wait()?;
         bail!("helper configuration handoff failed: {e}")
     }
     let mut ready = None;
@@ -295,7 +370,7 @@ fn supervise(
             reason = Some("timeout");
             break;
         }
-        if child.0.try_wait()?.is_some() {
+        if child.try_wait()?.is_some() {
             break;
         }
         std::thread::sleep(Duration::from_millis(1));
@@ -303,8 +378,8 @@ fn supervise(
     let execution_end = start.elapsed().as_micros() as u64;
     let cleanup = Instant::now();
     group.kill()?;
-    child.0.wait()?;
     let resources = group.finish()?;
+    child.wait()?;
     control
         .join()
         .map_err(|_| anyhow::anyhow!("control reader panicked"))??;
