@@ -11,6 +11,16 @@ pub enum DenyMode {
     Kill,
     Errno,
 }
+/// A pathname-socket capability. No IP route is added to the sandbox.
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(tag = "mode", rename_all = "snake_case", deny_unknown_fields)]
+pub enum Network {
+    #[default]
+    Airgap,
+    HttpsFetch {
+        socket: String,
+    },
+}
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Setup {
@@ -19,6 +29,8 @@ pub struct Setup {
     pub argv: Vec<String>,
     pub tmp_bytes: u64,
     pub mode: DenyMode,
+    #[serde(default)]
+    pub network: Network,
 }
 fn checked(rc: i32) -> io::Result<()> {
     if rc == -1 {
@@ -81,6 +93,23 @@ pub fn filesystem(s: &Setup) -> io::Result<()> {
     // Input rootfs and mountpoint ownership are validated by the trusted supervisor.
     mount(None, "/", None, libc::MS_REC | libc::MS_PRIVATE, None)?;
     mount(Some(&s.rootfs), &s.rootfs, None, libc::MS_BIND, None)?; // Non-recursive: never import submounts.
+    if let Network::HttpsFetch { socket } = &s.network {
+        // A single reviewed pathname socket is the entire egress capability.
+        let target = format!("{}/.microbox-egress/fetch.sock", s.rootfs);
+        mount(Some(socket), &target, None, libc::MS_BIND, None)?;
+        mount(
+            None,
+            &target,
+            None,
+            libc::MS_BIND
+                | libc::MS_REMOUNT
+                | libc::MS_RDONLY
+                | libc::MS_NOSUID
+                | libc::MS_NODEV
+                | libc::MS_NOEXEC,
+            None,
+        )?;
+    }
     std::env::set_current_dir(&s.rootfs)?;
     let dot = c(".")?;
     let old = c(".microbox-old")?;
