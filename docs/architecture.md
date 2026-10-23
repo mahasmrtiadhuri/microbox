@@ -29,3 +29,11 @@ Initial root is 32 zero bytes. Records contain sequence, event and hex digest. V
 - https://man7.org/linux/man-pages/man2/pivot_root.2.html
 - https://man7.org/linux/man-pages/man2/seccomp.2.html
 - https://docs.kernel.org/admin-guide/cgroup-v2.html
+
+## v0.2 capability transport
+
+`Network::Airgap` remains the default. `Network::HttpsFetch` adds exactly one reviewed pathname-socket bind mount at `.microbox-egress/fetch.sock` before pivot_root. A prepared placeholder and its directory must be real, root-owned, non-writable entries. The source must be a trusted socket in a private canonical host directory. The source parent is never mounted. The payload's network namespace remains unconfigured.
+
+The proxy is a fifth crate and a separately deployed process, not another privileged action in Tokio pre_exec. It accepts a single bounded JSON fetch frame, validates the host/scheme/port, resolves and rejects all nonpublic addresses, pins one address while preserving hostname verification, and returns only a bounded status/body response. Denials and fetch metadata go to a separate anchored audit stream. This deliberately provides narrower authority than transparent networking.
+
+Error-path child guards now request termination and hand the direct child to a background reaper if necessary, rather than potentially blocking the caller forever. Normal cleanup verifies `populated 0` and removes the leaf before direct-child wait. A failure retains an explicit error; there is no successful outcome with unverified cleanup.
